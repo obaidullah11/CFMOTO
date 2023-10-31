@@ -1,0 +1,41 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-sortablejs@latest/jquery-sortable.js"></script>
+    <script>
+        // Check if jQuery is loaded
+        if (typeof jQuery !== 'undefined') {
+            // jQuery is loaded
+            console.log('jQuery is loaded.');
+        } else {
+            // jQuery is not loaded
+            console.log('jQuery is not loaded.');
+        }
+    </script>
+    
+    
+    <script>
+        $(document).ready(function () {
+            $('#id_Maintenance_List_Point_name').on('dblclick', function () {
+                alert('Double-clicked!');
+            });
+        });
+    </script>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <!-- <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script> -->
+    
+    <script type="text/javascript" src="{% static 'js/admin_order_swap2.js' %}"></script>
+{% endblock %}
+
+{% block field-Maintenance_List_Point_name %}
+    <div class="form-row">
+        {{ form.Maintenance_List_Point_name.label_tag }} {{ form.Maintenance_List_Point_name }}
+    </div>
+{% endblock %}

@@ -1,12 +1,35 @@
 from rest_framework import generics
-from .models import Category,Subcategory,Product,SparePart,Mileage,History,ServiceImage,ProductService,Repairing,Maintenance,CheckMaintenance,newSparePart,CheckWarranty
+from .models import Category,Subcategory,Product,Maintenance_List,Mileage,ServiceImage,ProductService,Repairing,newSparePart,CheckWarranty
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import CategorySerializer,SubcategorySerializer,MileageSerializer,WarrantySerializer,ProductSerializer,SparePartSerializer,RepairingSerializer,getProductSerializer,ProductServiceSerializer,MechanicalNoteSerializer,HistorySerializer,ServiceImageSerializer,MaintenanceSerializer,CheckMaintenanceSerializer,newSparePartSerializer
+from .serializers import MaintenanceListSerializer,ProductServiceListSerializer,addServiceSerializer,CategorySerializer,SubcategorySerializer,MileageSerializer,WarrantySerializer,ProductSerializer,RepairingSerializer,getProductSerializer,ProductServiceSerializer,MechanicalNoteSerializer,ServiceImageSerializer,newSparePartSerializer
 from simple_history.models import HistoricalRecords
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 from django.http import JsonResponse
+class MaintenanceListPointByFactoryView(APIView):
+    def get(self, request, factory_name, format=None):
+        # Retrieve all Maintenance_List objects with the specified Factory_name
+        maintenance_lists = Maintenance_List.objects.filter(Factory_name__name=factory_name)
+
+        # Initialize a list to store Maintenance_List_Point_name values
+        maintenance_list_points = []
+
+        # Iterate through the Maintenance_List objects and collect all fields of Maintenance_List_Point_name
+        for maintenance_list in maintenance_lists:
+            maintenance_list_points.extend(maintenance_list.Maintenance_List_Point_name.values())
+
+        return Response(maintenance_list_points)
+class MaintenanceListByFactoryView(generics.ListAPIView):
+    serializer_class = MaintenanceListSerializer
+
+    def get_queryset(self):
+        factory_name = self.kwargs.get('factory_name')
+        return Maintenance_List.objects.filter(Factory_name__name=factory_name)
+
+
+
 @api_view(['POST'])
 def create_repairing(request):
     serializer = RepairingSerializer(data=request.data)
@@ -25,14 +48,14 @@ def create_warranty(request):
         print("Error creating warranty:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def get_active_check_warranty(request, sku):
-    try:
-        check_warranty = CheckWarranty.objects.get(product_id__sku=sku, is_active=True)
-        serializer = CheckWarrantySerializer(check_warranty)
-        return Response(serializer.data)
-    except CheckWarranty.DoesNotExist:
-        return Response({"message": "No active warranty found."}, status=200)
+# @api_view(['GET'])
+# def get_active_check_warranty(request, sku):
+#     try:
+#         check_warranty = CheckWarranty.objects.get(product_id__sku=sku, is_active=True)
+#         serializer = CheckWarrantySerializer(check_warranty)
+#         return Response(serializer.data)
+#     except CheckWarranty.DoesNotExist:
+#         return Response({"message": "No active warranty found."}, status=200)
 
 # api to check maintainence availible or not
 
@@ -49,27 +72,27 @@ def get_active_check_maintenance(request, sku):
 # api to create maintainence
 
 
-@api_view(['POST'])
-def create_maintenance(request):
-    data = request.data
-    serializer = MaintenanceSerializer(data=data)
-    if serializer.is_valid():
-        check_maintenance = serializer.validated_data.get('maintanence_id')
-        check_maintenance_id = check_maintenance.id if check_maintenance else None
-        print(check_maintenance_id)  # Print the value for debugging
-        if check_maintenance_id is not None:
-            CheckMaintenance.objects.filter(id=check_maintenance_id).update(is_active=False)
-        mentain = serializer.save()
-        parts = data.get("replace_parts","").split(",")
+# @api_view(['POST'])
+# def create_maintenance(request):
+#     data = request.data
+#     serializer = MaintenanceSerializer(data=data)
+#     if serializer.is_valid():
+#         check_maintenance = serializer.validated_data.get('maintanence_id')
+#         check_maintenance_id = check_maintenance.id if check_maintenance else None
+#         print(check_maintenance_id)  # Print the value for debugging
+#         if check_maintenance_id is not None:
+#             CheckMaintenance.objects.filter(id=check_maintenance_id).update(is_active=False)
+#         mentain = serializer.save()
+#         parts = data.get("replace_parts","").split(",")
 
-        for i in parts:
-            mentain.replace_parts.add(newSparePart.objects.get(id=int(i)))
+#         for i in parts:
+#             mentain.replace_parts.add(newSparePart.objects.get(id=int(i)))
 
-        mentain.save()
+#         mentain.save()
 
-        return Response(serializer.data, status=201)
-    else:
-        return Response(serializer.errors, status=400)
+#         return Response(serializer.data, status=201)
+#     else:
+#         return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 def newsparepart_detail(request, sku):
@@ -232,13 +255,13 @@ class SubcategoryByParentView(generics.ListAPIView):
 #         if model_id is not None:
 #             queryset = SparePart.objects.filter(model_id=model_id)
 #             return queryset
-class SparePartList(generics.ListCreateAPIView):
-    queryset = SparePart.objects.all()
-    serializer_class = SparePartSerializer
+# class SparePartList(generics.ListCreateAPIView):
+#     queryset = SparePart.objects.all()
+#     serializer_class = SparePartSerializer
 
-class SparePartDetail(generics.RetrieveUpdateDestroyAPIView):
-    queryset = SparePart.objects.all()
-    serializer_class = SparePartSerializer
+# class SparePartDetail(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = SparePart.objects.all()
+#     serializer_class = SparePartSerializer
 
 @api_view(['GET'])
 def get_product_by_vin(request, vin_code):
@@ -249,19 +272,19 @@ def get_product_by_vin(request, vin_code):
     except Product.DoesNotExist:
         return Response({'message': 'Product not found'}, status=404)
 
-@api_view(['POST'])
-def add_service(request):
-    serializer = addServiceSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+# @api_view(['POST'])
+# def add_service(request):
+#     serializer = addServiceSerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET'])
-def get_services(request):
-    services = Maintainence_panel.objects.all()
-    serializer = addServiceSerializer(Maintainence_panel, many=True)
-    return Response(serializer.data)
+# @api_view(['GET'])
+# def get_services(request):
+#     services = Maintainence_panel.objects.all()
+#     serializer = addServiceSerializer(Maintainence_panel, many=True)
+#     return Response(serializer.data)
 
 # @api_view(['POST'])
 # def product_service_create(request):
@@ -285,25 +308,25 @@ def mechanical_note_create(request):
 
 
 
-@api_view(['POST'])
-def create_history(request):
-    serializer = HistorySerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        message = {'message': 'History instance created successfully.'}
-        response_data = {**serializer.data, **message}
-        return Response(response_data, status=201)
-    return Response(serializer.errors, status=400)
+# @api_view(['POST'])
+# def create_history(request):
+#     serializer = HistorySerializer(data=request.data)
+#     if serializer.is_valid():
+#         serializer.save()
+#         message = {'message': 'History instance created successfully.'}
+#         response_data = {**serializer.data, **message}
+#         return Response(response_data, status=201)
+#     return Response(serializer.errors, status=400)
 
-@api_view(['GET'])
-def get_history_by_product(request, product_id):
-    try:
-        history = History.objects.filter(product_id=product_id).order_by('timestamp')
-        serializer = HistorySerializer(history, many=True)
-        return Response(serializer.data, status=200)
-    except History.DoesNotExist:
-        message = {'error': f'No history available for product with id {product_id}.'}
-        return Response(message, status=404)
+# @api_view(['GET'])
+# def get_history_by_product(request, product_id):
+#     try:
+#         history = History.objects.filter(product_id=product_id).order_by('timestamp')
+#         serializer = HistorySerializer(history, many=True)
+#         return Response(serializer.data, status=200)
+#     except History.DoesNotExist:
+#         message = {'error': f'No history available for product with id {product_id}.'}
+#         return Response(message, status=404)
 # views.py
 # @api_view(['GET'])
 # def (request, product_id):
@@ -338,18 +361,13 @@ def create_service_image(request):
     except Product.DoesNotExist:
         return Response({"message": "Product does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-
-# @api_view(['POST'])
-# def service_create(request):
-#     if request.method == 'POST':
-#         serializer = addServiceSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
+class ProductServiceCreate(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = ProductServiceSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 # @api_view(['GET'])
 # def service_list(request):
 #     if request.method == 'GET':

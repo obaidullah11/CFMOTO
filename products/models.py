@@ -201,7 +201,7 @@ class ServiceImage(models.Model):
     image4 = models.ImageField(upload_to='service_images/', null=True, blank=True)
 
     def __str__(self):
-        return f"ServiceImage {self.id} for {self.product.sku}"
+        return f"ServiceImage {self.id} for {self.product.id}"
 
 class ProductService(models.Model):
     is_active = models.BooleanField(default=True)

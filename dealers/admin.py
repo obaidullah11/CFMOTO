@@ -231,7 +231,7 @@ class ReceivedVehicleAdmin(admin.ModelAdmin):
 # @admin.register(RegisteredVehicle)
 
 class RegisteredVehicleAdmin(admin.ModelAdmin):
-    list_display = (
+    list_display = ('id',
         'status', 'sku', 'vin_code', 'vehicle_id','manufacture', 'Plate_number','country', 'series',
         'model_name', 'factory_name', 'color', 'eu_type_approval', 'body_type',
         'steering_power', 'wheels', 'screen', 'lights', 'cargo_compartments',

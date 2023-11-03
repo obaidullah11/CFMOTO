@@ -1,6 +1,7 @@
 from django.urls import path
 # from .views import CategoryListCreateAPIView,SubcategoryList,MileageList,create_product,create_repairing,create_warranty,SubcategoryListView,SubcategoryDetailView,SubcategoryByParentView,SubcategoryCreateView,SparePartDetail,SparePartList,get_product_by_vin,add_service,get_services,mechanical_note_create,create_history,get_history_by_product,create_service_image,create_product_service,service_create,service_list,get_service_images,get_active_check_maintenance,get_active_check_warranty,create_maintenance,newsparepart_detail
 from django.conf import settings
+from .views import MaintenanceListByFactoryView,newsparepart_detail,MaintenanceListPointByFactoryView,create_repairing,mechanical_note_create,create_service_image, ProductServiceCreate,get_service_images,create_product_service,create_warranty
 from django.conf.urls.static import static
 
 urlpatterns = [
@@ -16,11 +17,13 @@ urlpatterns = [
     # path('services/add/',add_service, name='add_service'),
     # path('getall/services/', get_services, name='service-list'),
     # path('product-service/create/', create_product_service, name='create_product_service'),
-    # path('services/create/', service_create, name='service-create'),
+    # path('product-service/create/', create_product_service, name='create_product_service'),
+    # path('productservice/create/', create_product_services, name='service-create'),
     # # path('history/create/', create_history, name='create_history'),
     # # path('products/<int:product_id>/history/',get_history_by_product, name='get_history_by_product'),
-    # path('service-image/', create_service_image, name='service-image'),
-    # path('mechanical-notes/create/', mechanical_note_create, name='mechanical_note_create'),
+    path('service-image/', create_service_image, name='service-image'),
+    path('mechanical-notes/create/', mechanical_note_create, name='mechanical_note_create'),
+    path('create_product_services/',  ProductServiceCreate.as_view(), name='create_product_services'),
     # path('getallservices/', service_list, name='service-list'),
     # path('api/maintenance/', create_maintenance, name='create_maintenance'),
     # # path('product-total-time/', create_product_total_time, name='create-product-total-time'),
@@ -30,18 +33,19 @@ urlpatterns = [
     # # path('warranty-claims/', get_warranty_claims, name='warranty-claims-list'),
     # # path('warranty-claims/create/', create_warranty_claim, name='create-warranty-claim'),
     # # path('warranty-claims/update/<int:claim_id>/', update_warranty_claim, name='update-warranty-claim'),
-    # path('api/service_image/<int:product_id>/', get_service_images, name='service-image-api'),
+    path('api/service_image/<int:product_id>/', get_service_images, name='service-image-api'),
     # path('api/check_maintenance/<str:sku>/', get_active_check_maintenance, name='get_active_check_maintenance'),
     # path('api/check_warranty/<str:sku>/', get_active_check_warranty, name='get_active_check_warranty'),
-    # path('api/newspareparts/<str:sku>/', newsparepart_detail, name='newsparepart-api'),
-    # path('api/repairing/create/', create_repairing, name='create_repairing'),
-    # path('api/warranty/create/', create_warranty, name='create_warranty'),
+    path('api/newspareparts/<str:sku>/', newsparepart_detail, name='newsparepart-api'),
+    path('api/repairing/create/', create_repairing, name='create_repairing'),
+    path('api/warranty/create/', create_warranty, name='create_warranty'),
     #   # URL pattern for the ServiceList view, filtering by SKU and mileage
     # # path('services/<str:sku_name>/<int:target_mileage>/', ServiceList.as_view(), name='filter'),
 
 
-
+    path('api/maintenance-list-point/factory/<str:factory_name>/', MaintenanceListPointByFactoryView.as_view(), name='maintenance-list-point-by-factory'),
     # path('mileages/', MileageList.as_view(), name='mileage-list'),
+    path('maintenance-lists/factory/<str:factory_name>/', MaintenanceListByFactoryView.as_view(), name='maintenance-lists-by-factory'),
 
 
 #

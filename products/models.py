@@ -305,7 +305,7 @@ class Warranty(models.Model):
     picture = models.ImageField(upload_to='maintenance/', null=True)
     video = models.FileField(upload_to='maintenance/', null=True)
     time = models.CharField("Time", max_length=255)
-    Warranty_id = models.CharField("Repairing ID", max_length=9, unique=True)
+    Warranty_id = models.CharField("Warranty ID", max_length=9, unique=True)
 
     def save(self, *args, **kwargs):
         if not self.id and not self.Warranty_id:

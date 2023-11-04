@@ -7,6 +7,7 @@ from .serializers import MaintenanceListSerializer,ProductServiceListSerializer,
 from simple_history.models import HistoricalRecords
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
 from django.http import JsonResponse
 class MaintenanceListPointByFactoryView(APIView):
     def get(self, request, factory_name, format=None):
@@ -26,7 +27,10 @@ class MaintenanceListByFactoryView(generics.ListAPIView):
 
     def get_queryset(self):
         factory_name = self.kwargs.get('factory_name')
-        return Maintenance_List.objects.filter(Factory_name__name=factory_name)
+        queryset = Maintenance_List.objects.filter(Factory_name__name=factory_name)
+        if not queryset:
+            raise NotFound(detail="Error 404, no maintenance list found for this factory", code=404)
+        return queryset
 
 
 
@@ -61,14 +65,14 @@ def create_warranty(request):
 
 
 
-@api_view(['GET'])
-def get_active_check_maintenance(request, sku):
-    try:
-        check_maintenance = CheckMaintenance.objects.get(product_id__sku=sku, is_active=True)
-        serializer = CheckMaintenanceSerializer(check_maintenance)
-        return Response(serializer.data)
-    except :
-        return Response({"message": "No active  maintenance found ."}, status=200)
+# @api_view(['GET'])
+# def get_active_check_maintenance(request, sku):
+#     try:
+#         check_maintenance = CheckMaintenance.objects.get(product_id__sku=sku, is_active=True)
+#         serializer = CheckMaintenanceSerializer(check_maintenance)
+#         return Response(serializer.data)
+#     except :
+#         return Response({"message": "No active  maintenance found ."}, status=200)
 # api to create maintainence
 
 

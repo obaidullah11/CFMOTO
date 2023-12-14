@@ -1,0 +1,120 @@
+fromrest_framework import serializers
+from .models import Category,temporaryRepairing,temporaryWarranty,bulletins_completed,Bulletins,Product,Subcategory,Maintenance_List,Mileage,ProductService,Warranty,MechanicalNote,Repairing,ServiceImage,newSparePart,CheckWarranty
+# from simple_history.models import HistoricalRecords
+from users.models import User
+class tempRepairingSerializer(serializers.ModelSerializer):
+    product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+    class Meta:
+        model = temporaryRepairing
+        fields = ('product_id', 'product_sku', 'mileage', 'customer_description', 'receiver_description', 'feedback','video','picture','time')
+
+
+class tempWarrantySerializer(serializers.ModelSerializer):
+    product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+    cs BulletinsSerlizer(serializers.ModelSerializer):
+    class Meta:
+        model = Bulletins
+        fields = '__all__'#
+ class warrantySerializer(serializers.ModelSerializer):
+#     product_sku = serializers.CharField(source='product_id.sku', read_only=True)
+
+#     class Meta:
+#         model = WarrantyClaim
+#         fields = ['product_sku', 'mileage', 'failure_description', 'repair_parts', 'cause', 'repair_remarks', 'review', 'remark', 'created_at', 'image', 'video']
+
+# serializers.py
+class BulletinsCompletedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bulletins_completed
+        fields = '__all__'
+class ProductServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductService
+        fields = '__all__'
+
+class ProductServiceListSerializer(serializers.ListSerializer):
+    child = ProductServiceSerializer()
+
+class MaintenanceListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Maintenance_List
+        fields = '__all__'
+        depth = 1  
+
+# class MaintenanceSerializer(serializers.ModelSerializer):
+#     product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+#     class Meta:
+#         model = Maintenance
+#         fields = ('id', 'maintanence_id', 'product_id', 'product_sku', 'mileage', 'customer_description', 'receiver_description', 'feedback','video','picture','time')
+class RepairingSerializer(serializers.ModelSerializer):
+    product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+    class Meta:
+        model = Repairing
+        fields = ('product_id', 'product_sku', 'mileage', 'customer_description', 'receiver_description', 'feedback','video','picture','time')
+class WarrantySerializer(serializers.ModelSerializer):
+    product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+    class Meta:
+        model = Warranty
+        fields = ('product_id', 'product_sku', 'mileage', 'cause', 'review', 'remarks','failure_description','video','picture','time')
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ('id', 'name', 'description')
+
+class SubcategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategory
+        fields = ('id', 'name', 'parent')
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ['id', 'sku', 'vin_code', 'manufacture', 'country', 'series', 'model_name', 'factory_name', 'color', 'eu_type_approval', 'body_type', 'steering_power', 'wheels', 'screen', 'lights', 'cargo_compartments', 'communication_terminal', 'date_of_manufacture', 'orderer', 'orderer_phone', 'orderer_email', 'importer', 'dealer', 'category', 'sub_category', 'image']
+# class ProductSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Product
+#         fields = '__all__'
+# class SparePartSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = SparePart
+#         fields = ('model_id', 'id_code', 'part_name', 'description')
+
+
+# class HistorySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = History
+#         fields = ['id', 'product', 'timestamp', 'description']
+class getProductSerializer(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(read_only=True)
+    sub_category = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Product
+        fields = ['id', 'public_id', 'sku', 'vin_code', 'manufacture', 'country', 'series', 'model_name', 'factory_name', 'color', 'eu_type_approval', 'body_type', 'steering_power', 'wheels', 'screen', 'lights', 'cargo_compartments', 'communication_terminal', 'date_of_manufacture', 'orderer', 'orderer_phone', 'orderer_email', 'importer', 'dealer', 'category', 'sub_category', 'image']
+
+####done###
+class ProductServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductService
+        fields = ['is_active', 'comment', 'executed', 'fill', 'value', 'product', 'name', 'time_spent', 'user']
+##########
+class MechanicalNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MechanicalNote
+        fields = ('id', 'product', 'note', 'date_created','user')
+
+
+# class HistorySerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = History
+#         fields = ('id', 'timestamp', 'description', 'product','user')
+
+
+
+class ServiceImageSerializer(serializers.ModelSerializer):
+    class Meta:
+     

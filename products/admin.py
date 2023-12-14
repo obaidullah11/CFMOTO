@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category,Subcategory,Product,ProductService,Vincode, Bulletins ,Maintenance_List,Maintainencepoint,Warranty,Mileage,Year,ServiceImage,Repairing,Vehicle,newSparePart,CheckWarranty
+from .models import TemporaryMechanicalNote,Category,Subcategory,bulletins_completed,temporarymaintenance,temporaryWarranty,temporaryRepairing,Product,ProductService,Vincode, Bulletins ,Maintenance_List,Maintainencepoint,Warranty,Mileage,Year,ServiceImage,Repairing,Vehicle,newSparePart,CheckWarranty
 from import_export import resources, fields
 from import_export.admin import ImportExportModelAdmin
 from adminsortable2.admin import SortableTabularInline
@@ -15,9 +15,80 @@ from import_export.admin import ImportExportModelAdmin
 from adminsortable2.admin import SortableAdminMixin
 from django import forms
 from import_export import resources
+
+
+@admin.register(temporarymaintenance)
+class temporarymaintenanceAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'product_name','executed', 'user_name','time_spent_s','fill','value','comment')
+    list_filter = ('user', 'product')
+    search_fields = ('name', 'comment', 'product__name', 'product__sku', 'user__username')
+    ordering = ('-id',)
+
+    def time_spent_s(self, obj):
+        return f"{obj.time_spent}s" if obj.time_spent else "0s"
+    def user_name(self, obj):
+        return obj.user.name
+
+    def product_name(self, obj):
+        return obj.product.model_name
+
+    user_name.short_description = 'User'
+    product_name.short_description = 'Product'
+
+
+@admin.register(temporaryRepairing)
+
+class tempRepairingAdmin(admin.ModelAdmin):
+    list_display = [ 'product_id', 'mileage', 'customer_description', 'receiver_description', 'feedback']
+    list_filter = ['product_id__sku']
+    exclude=['picture','video']
+    # search_fields = ['repairing_id', 'product_id__sku', 'customer_description']
+    ordering = ['-id']
+    def product_id(self, obj):
+        return obj.product.sku
+    def get_replace_parts_names(self, obj):
+        return ", ".join([part.part_name for part in obj.replace_parts.all()])
+    def time_spent_s(self, obj):
+        return f"{obj.time}s"
+
+    get_replace_parts_names.short_description = 'Replace Parts'
+
+    # Optionally, override the save_model method to perform custom logic
+    def save_model(self, request, obj, form, change):
+        # Custom logic to be executed when saving the model instance
+        super().save_model(request, obj, form, change)
+@admin.register(temporaryWarranty)        
+class tempWarrantyAdmin(admin.ModelAdmin):
+    list_display = [ 'mileage','product_id', 'cause', 'review', 'remarks','failure_description']
+    list_filter = ['product_id__sku']
+    search_fields = ['product_id__sku','failure_description']
+    ordering = ['-id']
+
+    def get_replace_parts_names(self, obj):
+        return ", ".join([part.part_name for part in obj.replace_parts.all()])
+
+    get_replace_parts_names.short_description = 'Replace Parts'
+    # def time_spent_s(self, obj):
+    #     return f"{obj.time}s"
+
+    # Optionally, override the save_model method to perform custom logic
+    def save_model(self, request, obj, form, change):
+        # Custom logic to be executed when saving the model instance
+        super().save_model(request, obj, form, change)
 class VincodeAdmin(ImportExportModelAdmin):
     list_display = ('vincode', )
+class BulletinsCompletedAdmin(admin.ModelAdmin):
+    list_display = ('id', 'bulletins_id', 'bulletins_mechanical_note')  # Customize as needed
+    search_fields = ['bulletins_id']
+    def has_add_permission(self, request):
+        return False
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    # Add search fields if you have related fields
 
+# Register your models here
+admin.site.register(bulletins_completed, BulletinsCompletedAdmin)
 
 class BulletinsAdmin(admin.ModelAdmin):
     list_display = ('id','bulletins_name', 'Date')
@@ -35,6 +106,9 @@ class MaintainencepointAdmin(ImportExportModelAdmin):
     list_filter = ( 'instruction_active', )
     search_fields = ('Maintainencepoint_name',)
     exclude=('my_order',)
+    class Media:
+        js = ('js/file_privew.js',) 
+
 
 
 @admin.register(Maintenance_List)
@@ -148,23 +222,23 @@ class ServiceImageAdmin(admin.ModelAdmin):
     list_filter = ('product__vin_code',)
     search_fields = ('product__vin_code', 'product__name',)
     # date_hierarchy = 'product__created_at'
-# @admin.register(ProductService)
-# class ProductServiceAdmin(admin.ModelAdmin):
-#     list_display = ('id', 'name', 'product_name', 'is_active', 'executed', 'user_name','time_spent_s','fill','value','comment')
-#     list_filter = ('user', 'product')
-#     search_fields = ('name', 'comment', 'product__name', 'product__sku', 'user__username')
-#     ordering = ('-id',)
+@admin.register(ProductService)
+class ProductServiceAdmin(admin.ModelAdmin):
+     list_display = ('id', 'name', 'product_name', 'is_active', 'executed', 'user_name','time_spent_s','fill','value','comment')
+     list_filter = ('user', 'product')
+     search_fields = ('name', 'comment', 'product__name', 'product__sku', 'user__username')
+     ordering = ('-id',)
 
-#     def time_spent_s(self, obj):
-#         return f"{obj.time_spent}s" if obj.time_spent else "0s"
-#     def user_name(self, obj):
-#         return obj.user.name
+     def time_spent_s(self, obj):
+         return f"{obj.time_spent}s" if obj.time_spent else "0s"
+     def user_name(self, obj):
+         return obj.user.name
 
-#     def product_name(self, obj):
-#         return obj.product.model_name
+     def product_name(self, obj):
+         return obj.product.model_name
 
-#     user_name.short_description = 'User'
-#     product_name.short_description = 'Product'
+     user_name.short_description = 'User'
+     product_name.short_description = 'Product'
 class MaintainencepointAdmin(admin.ModelAdmin):
     list_display = ('Point_id','Maintainencepoint_name', 'instruction_active', 'fill_active', 'value_active', 'display_image_1', 'display_image_2', 'display_image_3', 'display_image_4', 'display_video_thumbnail')
     list_filter = ('instruction_active', 'fill_active', 'value_active')
@@ -252,6 +326,8 @@ admin.site.register(ServiceImage, ServiceImageAdmin)
 admin.site.register(Warranty,WarrantyAdmin)
 admin.site.site_header = 'CFMOTO'
 # admin.site.register(Mileage)
-# admin.site.register(Year)
+admin.site.register(Vincode)
 admin.site.register(Bulletins, BulletinsAdmin)
 # admin.site.register(Vincode, VincodeAdmin)
+
+admin.site.register(TemporaryMechanicalNote)

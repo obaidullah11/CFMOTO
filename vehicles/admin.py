@@ -268,7 +268,7 @@ class ModelNameAdmin(ImportExportModelAdmin):
 
         return result
 
-    list_display = ('name', 'description')  # Add more fields if needed
+    list_display = ('name','category')  # Add more fields if needed
 
 # Register other models and their respective resources here if needed.
 
@@ -303,7 +303,7 @@ class ColorAdmin(ImportExportModelAdmin):
 
         return result
 
-    list_display = ('name', 'description')  # Add more fields if needed
+    list_display = ('name', 'description','category')  # Add more fields if needed
 
 class EUTypeApprovalResource(resources.ModelResource):
     name = fields.Field(attribute='name', column_name='Eu type')  # Add other fields if needed
@@ -336,7 +336,7 @@ class EUTypeApprovalAdmin(ImportExportModelAdmin):
 
         return result
 
-    list_display = ('name', 'description')
+    list_display = ('name', 'description','category')
 # @admin.register(BodyType)
 # class BodyTypeAdmin(admin.ModelAdmin):
 #     list_display = ('name', 'description')
@@ -405,7 +405,7 @@ class WheelsAdmin(ImportExportModelAdmin):
 
         return result
 
-    list_display = ('name', 'description')
+    list_display = ('name', 'description','category')
 
 class CommunicationTerminalResource(resources.ModelResource):
     name = fields.Field(attribute='name', column_name='Communication terminal')  # Add other fields if needed
@@ -471,7 +471,7 @@ class ScreenAdmin(ImportExportModelAdmin):
 
         return result
 
-    list_display = ('name', 'description')
+    list_display = ('name', 'description','category')
 class FactoryResource(resources.ModelResource):
     name = fields.Field(attribute='name', column_name='Factory name')  # Add other fields if needed
     category = fields.Field(

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.utils.html import format_html
 from Events.models import vehiclehystory
 from .models import *
-
+from import_export.admin import ImportExportModelAdmin
 # # # User = get_user_model()
 
 # # # class OrderAdmin(admin.ModelAdmin):
@@ -230,13 +230,10 @@ class ReceivedVehicleAdmin(admin.ModelAdmin):
 
 # @admin.register(RegisteredVehicle)
 
-class RegisteredVehicleAdmin(admin.ModelAdmin):
+class RegisteredVehicleAdmin(ImportExportModelAdmin):
     list_display = ('id',
-        'status', 'sku', 'vin_code', 'vehicle_id','manufacture', 'Plate_number','country', 'series',
-        'model_name', 'factory_name', 'color', 'eu_type_approval', 'body_type',
-        'steering_power', 'wheels', 'screen', 'lights', 'cargo_compartments',
-        'communication_terminal',
-        'date_of_manufacture', 'orderer', 'orderer_phone', 'orderer_email'
+        'status', 'sku', 'vin_code','Plate_number','country', 'series',
+         'factory_name',  'orderer_phone', 'orderer_email'
     )
 
     # If you want to display the image in the list view, you can define a custom method like this:

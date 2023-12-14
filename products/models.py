@@ -9,6 +9,24 @@ from vehicles.models import Factory,SKU,Series
 
 from datetime import datetime
 from django_toggle_m2m.toggle import ToggleManyToMany
+
+
+
+
+class TemporaryMechanicalNote(models.Model):
+    product = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE, related_name='temporary_mechanical_notes')
+    note = models.TextField( blank=True)
+    selected_mileage = models.IntegerField(blank=True)  # or use models.DecimalField() based on your requirement
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.product} - {self.date_created}"
+
+
+
+
+
+
 class Vincode(models.Model):
     vincode = models.CharField(max_length=17, unique=True)
 
@@ -40,6 +58,23 @@ class Bulletins(models.Model):
     class Meta:
         verbose_name = 'Bulletins'
         verbose_name_plural = 'Bulletins'
+class bulletins_completed(models.Model):
+    bulletins_id = models.ForeignKey(Bulletins, on_delete=models.CASCADE)  # Replace 'OtherModel' with the actual model name you want to reference.
+    bulletins_image = models.ImageField(upload_to='bullet_images/', blank=True, null=True)
+    bulletins_video = models.FileField(upload_to='bulletins/', null=True)  # For image storage using Django's ImageField
+    # bulletins_video = models.URLField(max_length=255,blank=True, null=True)
+    bulletins_mechanical_note = models.TextField()
+
+    def __str__(self):
+        return f"Bullet {self.id}"
+    class Meta:
+        verbose_name = 'Bulletins submit '
+        verbose_name_plural = 'Bulletins submit'
+
+
+
+
+
 class Vehicle(models.Model):
     MODEL_SKU = models.CharField(max_length=50, null=True)
     CATEGORY = models.CharField(max_length=50, null=True)
@@ -228,31 +263,6 @@ class MechanicalNote(models.Model):
 
     def __str__(self):
         return f"{self.product} - {self.date_created}"
-class ProductService(models.Model):
-    is_active = models.BooleanField(default=True)
-    comment = models.TextField(null=True, blank=True)
-    executed = models.BooleanField(default=False)
-    fill = models.CharField(max_length=50, null=True, blank=True)
-    value = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
-    product = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE, related_name='services', null=True)
-    name = models.CharField(max_length=100)
-    time_spent = models.IntegerField(null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='services')
-
-    def __str__(self):
-        return f"{self.name} - {self.product.sku}"
-    class Meta:
-        verbose_name = 'Maintenance preparation'
-        verbose_name_plural = 'Maintenance preparation'
-
-
-class MechanicalNote(models.Model):
-    product = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE, related_name='mechanical_notes')
-    note = models.TextField()
-    date_created = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.product} - {self.date_created}"
 class CheckWarranty(models.Model):
     product_id = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE)
     warranty_name = models.CharField(max_length=255)
@@ -320,3 +330,53 @@ class Warranty(models.Model):
 
     def __str__(self):
         return f"{self.product_id.sku} - {self.product_id.sku}"
+
+class temporaryRepairing(models.Model):
+    product_id = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE)
+    mileage = models.PositiveIntegerField( blank=True)
+    customer_description = models.TextField( blank=True)
+    receiver_description = models.TextField( blank=True)
+    feedback = models.TextField( blank=True)
+    replace_parts = models.ManyToManyField(newSparePart)
+    picture = models.ImageField(upload_to='maintenance/',blank=True, null=True)
+    video = models.FileField(upload_to='maintenance/',blank=True, null=True)
+    time = models.CharField("Time", max_length=255)
+   
+    def __str__(self):
+        return f"{self.product_id.sku} - {self.product_id.sku}"
+
+
+
+class temporaryWarranty(models.Model):
+    product_id = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE)
+    mileage = models.PositiveIntegerField( blank=True)
+    cause = models.TextField( blank=True)
+    review = models.TextField( blank=True)
+    remarks = models.TextField( blank=True)
+    failure_description = models.TextField( blank=True)
+    replace_parts = models.ManyToManyField(newSparePart)
+    picture = models.ImageField(upload_to='maintenance/',blank=True, null=True)
+    video = models.FileField(upload_to='maintenance/',blank=True, null=True)
+    time = models.CharField("Time", max_length=255)
+    
+
+    
+
+    def __str__(self):
+        return f"{self.product_id.sku} - {self.product_id.sku}"
+class temporarymaintenance(models.Model):
+    is_active = models.BooleanField(default=True)
+    comment = models.TextField(null=True, blank=True)
+    executed = models.BooleanField(default=False)
+    fill = models.CharField(max_length=50, null=True, blank=True)
+    value = models.DecimalField(max_digits=8, decimal_places=2, null=True, blank=True)
+    product = models.ForeignKey(RegisteredVehicle, on_delete=models.CASCADE, related_name='tempservices', null=True)
+    name = models.CharField(max_length=100)
+    time_spent = models.IntegerField(null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tempuserservices')
+
+    def __str__(self):
+        return f"{self.name} - {self.product.sku}"
+    class Meta:
+         verbose_name = 'temporary maintenance'
+         verbose_name_plural = 'temporary maintenance'

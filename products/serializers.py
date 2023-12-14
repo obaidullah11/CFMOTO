@@ -1,8 +1,47 @@
 from rest_framework import serializers
-from .models import Category,Product,Subcategory,Maintenance_List,Mileage,ProductService,Warranty,MechanicalNote,Repairing,ServiceImage,newSparePart,CheckWarranty
+from .models import temporarymaintenance,TemporaryMechanicalNote,Category,temporaryRepairing,temporaryWarranty,bulletins_completed,Bulletins,Product,Subcategory,Maintenance_List,Mileage,ProductService,Warranty,MechanicalNote,Repairing,ServiceImage,newSparePart,CheckWarranty
 # from simple_history.models import HistoricalRecords
 from users.models import User
 
+
+class TemporaryMaintenanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = temporarymaintenance
+        fields = '__all__'  # Or specify the fields you want to include
+
+
+class TemporaryMechanicalNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TemporaryMechanicalNote
+        fields = '__all__'  # Or specify a list of fields you want to include
+
+class tempRepairingSerializer(serializers.ModelSerializer):
+    product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+    class Meta:
+        model = temporaryRepairing
+        fields = ('id','product_id', 'product_sku', 'mileage', 'customer_description', 'receiver_description', 'feedback','video','picture','time')
+
+
+class tempWarrantySerializer(serializers.ModelSerializer):
+    product_sku = serializers.ReadOnlyField(source='product_id.sku')
+
+    class Meta:
+        model = temporaryWarranty
+        fields = ('id','product_id', 'product_sku', 'mileage', 'cause', 'review', 'remarks','failure_description','video','picture','time')
+
+
+
+
+
+class BulletinsCompletedSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = bulletins_completed
+        fields = '__all__'
+class BulletinsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Bulletins
+        fields = '__all__'
 # class warrantySerializer(serializers.ModelSerializer):
 #     product_sku = serializers.CharField(source='product_id.sku', read_only=True)
 
@@ -11,6 +50,7 @@ from users.models import User
 #         fields = ['product_sku', 'mileage', 'failure_description', 'repair_parts', 'cause', 'repair_remarks', 'review', 'remark', 'created_at', 'image', 'video']
 
 # serializers.py
+
 class ProductServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductService

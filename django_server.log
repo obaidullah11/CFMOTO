@@ -1,0 +1,17 @@
+nohup: ignoring input
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+November 30, 2023 - 17:51:12
+Django version 4.1.7, using settings 'CFMOTO.settings'
+Starting development server at http://127.0.0.1:8001/
+Quit the server with CONTROL-C.
+[30/Nov/2023 17:51:35] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x00·\x01\x00\x00³\x03\x03ÝóeÙêrè\x01¶O¬ùêRX¹ã4\x908\x11$i\x97cN\x02')
+[30/Nov/2023 17:51:35] You're accessing the development server over HTTPS, but it only supports HTTP.
+[30/Nov/2023 17:51:36] code 400, message Bad request version ("\x9e\x9b'»\x00\x008À,À0\x00\x9fÌ©Ì¨ÌªÀ+À/\x00\x9eÀ$À(\x00kÀ#À'\x00gÀ")
+[30/Nov/2023 17:51:36] You're accessing the development server over HTTPS, but it only supports HTTP.
+Not Found: /
+[30/Nov/2023 18:08:33] "GET / HTTP/1.1" 404 5968
+[30/Nov/2023 18:08:53] "GET /admin/ HTTP/1.1" 302 0
+[30/Nov/2023 18:08:59] "GET /admin HTTP/1.1" 301 0

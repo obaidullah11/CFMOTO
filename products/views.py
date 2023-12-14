@@ -1,14 +1,202 @@
 from rest_framework import generics
-from .models import Category,Subcategory,Product,Maintenance_List,Mileage,ServiceImage,ProductService,Repairing,newSparePart,CheckWarranty
+from .models import TemporaryMechanicalNote,temporarymaintenance,Category,temporaryWarranty,temporaryRepairing,Subcategory,Product,bulletins_completed,Maintenance_List,Bulletins,Mileage,ServiceImage,ProductService,Repairing,newSparePart,CheckWarranty
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import MaintenanceListSerializer,ProductServiceListSerializer,addServiceSerializer,CategorySerializer,SubcategorySerializer,MileageSerializer,WarrantySerializer,ProductSerializer,RepairingSerializer,getProductSerializer,ProductServiceSerializer,MechanicalNoteSerializer,ServiceImageSerializer,newSparePartSerializer
+from .serializers import  TemporaryMaintenanceSerializer,BulletinsCompletedSerializer,TemporaryMechanicalNoteSerializer,tempWarrantySerializer,tempRepairingSerializer,MaintenanceListSerializer,BulletinsSerializer,ProductServiceListSerializer,addServiceSerializer,CategorySerializer,SubcategorySerializer,MileageSerializer,WarrantySerializer,ProductSerializer,RepairingSerializer,getProductSerializer,ProductServiceSerializer,MechanicalNoteSerializer,ServiceImageSerializer,newSparePartSerializer
 from simple_history.models import HistoricalRecords
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from django.http import JsonResponse
+
+@api_view(['POST'])  # Changed from 'DELETE' to 'POST'
+def delete_temporary_maintenance_by_product(request, product_id):
+    try:
+        # Get all maintenance records for the given product_id
+        maintenance_records = temporarymaintenance.objects.filter(product_id=product_id)
+        if not maintenance_records:
+            return Response({'message': 'No records found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Delete the records
+        maintenance_records.delete()
+        return Response({'message': 'Records deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['POST'])
+def create_temporary_maintenance(request):
+    if request.method == 'POST':
+        data = request.data  # Get the list of dictionaries from the request
+
+        # Ensure that the data is a list
+        if not isinstance(data, list):
+            return Response({'error': 'Data must be a list of dictionaries'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Serialize each dictionary in the list and save
+        serialized_data = []
+        for item_data in data:
+            serializer = TemporaryMaintenanceSerializer(data=item_data)
+            if serializer.is_valid():
+                serializer.save()
+                serialized_data.append(serializer.data)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serialized_data, status=status.HTTP_201_CREATED)
+
+@api_view(['GET'])
+def get_temporary_maintenance_by_product(request, product_id):
+    try:
+        maintenance_records = temporarymaintenance.objects.filter(product_id=product_id)
+        serializer = TemporaryMaintenanceSerializer(maintenance_records, many=True)
+
+        if not maintenance_records:
+            # Return a response with status 200 and an empty data list
+            return Response([], status=status.HTTP_200_OK)
+
+        return Response(serializer.data)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def create_temporary_mechanical_note(request):
+    if request.method == 'POST':
+        serializer = TemporaryMechanicalNoteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+@api_view(['POST'])  # Change to POST
+def delete_temporary_mechanical_note_by_product(request, product_id):
+    try:
+        # Find the note by product_id
+        note = TemporaryMechanicalNote.objects.get(product_id=product_id)
+    except TemporaryMechanicalNote.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    # No need to check request.method == 'DELETE' as it's now a POST request
+    note.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+
+@api_view(['GET'])
+def get_temporary_mechanical_note_by_product(request, product_id):
+    try:
+        # Find the note by product_id
+        note = TemporaryMechanicalNote.objects.get(product_id=product_id)
+
+        # Serialize the note object
+        serializer = TemporaryMechanicalNoteSerializer(note)
+        return Response(serializer.data)
+    except TemporaryMechanicalNote.DoesNotExist:
+        # Return a response with status 200 and an empty data object
+        return Response({}, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(['POST'])
+def delete_temporary_repairing(request, pk):
+    if request.method == 'POST':
+        try:
+            temporary_repairing = temporaryRepairing.objects.get(pk=pk)
+            temporary_repairing.delete()
+            return Response({'message': 'Record deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except temporaryrepairing.DoesNotExist:
+            return Response({'error': 'Record does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'error': 'Invalid request method'}, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def delete_temporary_warranty(request, pk):
+    try:
+        warranty = temporaryWarranty.objects.get(pk=pk)
+        warranty.delete()
+        return Response({'message': 'Temporary warranty record deleted successfully'})
+    except temporaryWarranty.DoesNotExist:
+        return Response({'error': 'Temporary warranty data not found for the given Warranty ID'}, status=404)
+@api_view(['GET'])
+def get_temporary_repairing_by_product_id(request, product_id):
+    try:
+        repairing = temporaryRepairing.objects.get(product_id=product_id)
+        serializer = tempRepairingSerializer(repairing)
+        return Response(serializer.data)
+    except temporaryRepairing.DoesNotExist:
+        return Response({'error': 'Temporary repairing data not found for the given product ID'}, status=404)
+
+
+@api_view(['GET'])
+def get_temporary_warranty_by_product_id(request, product_id):
+    try:
+        warranty = temporaryWarranty.objects.get(product_id=product_id)
+        serializer = tempWarrantySerializer(warranty)
+        return Response(serializer.data)
+    except temporaryWarranty.DoesNotExist:
+        return Response({'error': 'Temporary warranty not found for the given product ID'}, status=404)
+
+
+@api_view(['POST'])
+def temp_create_repairing(request):
+    product_id = request.data.get('product_id')  # Assuming 'product_id' is the field name
+    existing_record = temporaryRepairing.objects.filter(product_id=product_id).first()
+
+    if existing_record:
+        # If record exists, update it
+        serializer = tempRepairingSerializer(existing_record, data=request.data)
+    else:
+        # If record does not exist, create a new one
+        serializer = tempRepairingSerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['POST'])
+def temp_create_warranty(request):
+    product_id = request.data.get('product_id')  # Assuming 'product_id' is the field name
+    existing_record = temporaryWarranty.objects.filter(product_id=product_id).first()
+
+    if existing_record:
+        # If record exists, update it
+        serializer = tempWarrantySerializer(existing_record, data=request.data)
+    else:
+        # If record does not exist, create a new one
+        serializer = tempWarrantySerializer(data=request.data)
+
+    if serializer.is_valid():
+        serializer.save()
+        print("Warranty created/updated successfully!")
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        print("Error creating/updating warranty:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def add_bulletins_completed(request):
+    if request.method == 'POST':
+        serializer = BulletinsCompletedSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def get_bulletins_by_vin(request, vin_code):
+    bulletins = Bulletins.objects.filter(vincode__vincode=vin_code)
+    serializer = BulletinsSerializer(bulletins, many=True)
+    return Response(serializer.data)
+
+
+
+
 class MaintenanceListPointByFactoryView(APIView):
     def get(self, request, factory_name, format=None):
         # Retrieve all Maintenance_List objects with the specified Factory_name

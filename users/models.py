@@ -92,7 +92,8 @@ class User(AbstractUser):
         unique=True,
     )
     name = models.CharField(max_length=200)
-    contact = models.IntegerField(default=0)
+    contact = models.CharField(max_length=200,null=True)
+    ip_access = models.GenericIPAddressField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

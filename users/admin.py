@@ -14,7 +14,7 @@ class UsermodelAdmin(BaseUserAdmin):
     fieldsets = (
         ('User Credentials', {'fields': ('email', 'password')}),
         ('Personal info', {'fields': ('name','contact',"image")}),
-        ('Permissions', {'fields': ('is_admin',)}),
+        ('Permissions', {'fields': ('is_admin','ip_access')}),
         ('Role', {'fields': ('role',)}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
@@ -22,7 +22,7 @@ class UsermodelAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'name','contact', 'password1', 'password2','role'),
+            'fields': ('email', 'name','contact', 'password1', 'password2','role','ip_access'),
         }),
     )
     search_fields = ('email','contact')
